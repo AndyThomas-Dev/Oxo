@@ -14,8 +14,9 @@ class OXOController
 {
     private String input;
     private OXOModel model;
+
     public int current = 1;
-    public int GameOver = 0;
+    public boolean GameOver = false;
 
     public OXOController(OXOModel model)
     {
@@ -80,25 +81,38 @@ class OXOController
         }
         else {
 
-            if(GameOver == 0) {
-                model.setCellOwner(convertCharToInt(x), convertCharToInt(y), model.getCurrentPlayer());
-                swapPlayer(current);
+            if(GameOver == false) {
+                if(model.getCellOwner(convertCharToInt(x), convertCharToInt(y)) == null) {
+                    model.setCellOwner(convertCharToInt(x), convertCharToInt(y), model.getCurrentPlayer());
+                    swapPlayer(current);
+                }
+                else{
+                    throw new CellAlreadyTakenException(convertCharToInt(x), convertCharToInt(y));
+                }
             }
+
         }
 
-        // Check for winner
+        // Check for winner (one function ?)
         if (winnerCheck(model, 1) == 1)
         {
             model.setWinner(model.getPlayerByNumber(1));
-            GameOver = 1;
+            GameOver = true;
         }
 
         if (winnerCheck(model, 0) == 0)
         {
             model.setWinner(model.getPlayerByNumber(0));
-            GameOver = 1;
+            GameOver = true;
         }
 
+        if (drawCheck(model) == 1)
+        {
+            model.setGameDrawn();
+            GameOver = true;
+        }
+
+        // Moves to next player
         if(current == 0) {
             if(current != model.getNumberOfPlayers()-1) {
                 current++;
@@ -109,15 +123,6 @@ class OXOController
             current = 0;
         }
 
-
-        if(command.contains(("d2"))) {
-            throw new InvalidCellIdentifierException("Bad", "Bad");
-        }
-
-
-        if(command.contains(("zz"))) {
-            throw new CellAlreadyTakenException(1, 9);
-        }
 
         if(command.contains("exit"))
         {
