@@ -93,24 +93,7 @@ class OXOController
 
         }
 
-        // Check for winner (one function ?)
-        if (winnerCheck(model, 1) == 1)
-        {
-            model.setWinner(model.getPlayerByNumber(1));
-            GameOver = true;
-        }
-
-        if (winnerCheck(model, 0) == 0)
-        {
-            model.setWinner(model.getPlayerByNumber(0));
-            GameOver = true;
-        }
-
-        if (drawCheck(model) == 1)
-        {
-            model.setGameDrawn();
-            GameOver = true;
-        }
+        checkOutcome();
 
         // Moves to next player
         if(current == 0) {
@@ -127,6 +110,29 @@ class OXOController
         if(command.contains("exit"))
         {
             System.exit(0);
+        }
+
+    }
+
+    private void checkOutcome()
+    {
+
+        if (winnerCheck(model, 1) == 1)
+        {
+            model.setWinner(model.getPlayerByNumber(1));
+            GameOver = true;
+        }
+
+        if (winnerCheck(model, 0) == 0)
+        {
+            model.setWinner(model.getPlayerByNumber(0));
+            GameOver = true;
+        }
+
+        if (drawCheck(model) == 1)
+        {
+            model.setGameDrawn();
+            GameOver = true;
         }
 
     }
