@@ -14,7 +14,8 @@ class OXOController
 {
     private String input;
     private OXOModel model;
-    public int  current = 1;
+    public int current = 1;
+    public int GameOver = 0;
 
     public OXOController(OXOModel model)
     {
@@ -75,22 +76,27 @@ class OXOController
 
         if((convertCharToInt(x) > 2 || convertCharToInt(y) > 2) ||
                 (convertCharToInt(x) < 0 || convertCharToInt(y) < 0)) {
-            throw new CellDoesNotExistException(x, y);
+            throw new CellDoesNotExistException(convertCharToInt(x), convertCharToInt(y));
         }
         else {
-            model.setCellOwner(convertCharToInt(x), convertCharToInt(y), model.getCurrentPlayer());
-            swapPlayer(current);
+
+            if(GameOver == 0) {
+                model.setCellOwner(convertCharToInt(x), convertCharToInt(y), model.getCurrentPlayer());
+                swapPlayer(current);
+            }
         }
 
         // Check for winner
         if (winnerCheck(model, 1) == 1)
         {
             model.setWinner(model.getPlayerByNumber(1));
+            GameOver = 1;
         }
 
         if (winnerCheck(model, 0) == 0)
         {
             model.setWinner(model.getPlayerByNumber(0));
+            GameOver = 1;
         }
 
         if(current == 0) {
