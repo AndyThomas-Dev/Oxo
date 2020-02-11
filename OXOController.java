@@ -32,18 +32,27 @@ class OXOController
 
         model.setCurrentPlayer(model.getPlayerByNumber(0));
 
-        // Check for winner
-        if (winnerCheck(model, 1) == 1)
-        {
-            model.setWinner(model.getPlayerByNumber(1));
-        }
-
-        if (winnerCheck(model, 0) == 0)
-        {
-            model.setWinner(model.getPlayerByNumber(0));
-        }
 
             System.out.println(input);
+    }
+
+    public int convertCharToInt(char c)
+    {
+        int x;
+
+        if(c >= 'a' & c <= 'z') {
+            x = c - 'a';
+            return x;
+        }
+
+        if(c >= 'A' & c <= 'C') {
+            x = c - 'A';
+            return x;
+        }
+
+        x = Character.getNumericValue(c) - 1;
+
+        return x;
     }
 
     public void swapPlayer(int current)
@@ -56,35 +65,47 @@ class OXOController
     public void handleIncomingCommand(String command) throws InvalidCellIdentifierException,
             CellAlreadyTakenException, CellDoesNotExistException
     {
-
-        if(command.contains(("a1"))) {
-            model.setCellOwner(0,0, model.getCurrentPlayer());
-            swapPlayer(current);
-            System.out.println("Setting cell to owner:" + current);
-
-            if(current == 0)
-            {
-                current++;
-            }
-            else
-                {
-                current = 0;
-            }
-
-        }
+        char[] characters = command.toCharArray();
+        char x = characters[0]; char y = characters[1];
 
         if(command.length() > 2)
         {
             throw new InvalidCellIdentifierException("Bad", "Bad");
         }
 
+        if((convertCharToInt(x) > 2 && convertCharToInt(y) > 2) ||
+                (convertCharToInt(x) < 0 && convertCharToInt(y) < 0)) {
+            throw new CellDoesNotExistException(x, y);
+        }
+        else {
+            model.setCellOwner(convertCharToInt(x), convertCharToInt(y), model.getCurrentPlayer());
+            swapPlayer(current);
+        }
+
+        // Check for winner
+        if (winnerCheck(model, 1) == 1)
+        {
+            model.setWinner(model.getPlayerByNumber(1));
+        }
+
+        if (winnerCheck(model, 0) == 0)
+        {
+            model.setWinner(model.getPlayerByNumber(0));
+        }
+
+        if(current == 0) {
+            current++;
+        }
+
+        else {
+            current = 0;
+        }
+
+
         if(command.contains(("d2"))) {
             throw new InvalidCellIdentifierException("Bad", "Bad");
         }
 
-        if(command.contains(("a9"))) {
-            throw new CellDoesNotExistException(1, 9);
-        }
 
         if(command.contains(("zz"))) {
             throw new CellAlreadyTakenException(1, 9);
@@ -220,6 +241,10 @@ class OXOController
     public void testing(OXOModel model)
     {
         assert(model.getNumberOfPlayers() == 2);
+
+        assert(convertCharToInt('a') == 0);
+        assert(convertCharToInt('b') == 1);
+        assert(convertCharToInt('c') == 2);
 
         model.setCellOwner(0,0, model.getPlayerByNumber(1));
         model.setCellOwner(0,2, model.getPlayerByNumber(1));
