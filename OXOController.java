@@ -73,8 +73,8 @@ class OXOController
             throw new InvalidCellIdentifierException("Bad", "Bad");
         }
 
-        if((convertCharToInt(x) > 2 && convertCharToInt(y) > 2) ||
-                (convertCharToInt(x) < 0 && convertCharToInt(y) < 0)) {
+        if((convertCharToInt(x) > 2 || convertCharToInt(y) > 2) ||
+                (convertCharToInt(x) < 0 || convertCharToInt(y) < 0)) {
             throw new CellDoesNotExistException(x, y);
         }
         else {
@@ -94,7 +94,9 @@ class OXOController
         }
 
         if(current == 0) {
-            current++;
+            if(current != model.getNumberOfPlayers()-1) {
+                current++;
+            }
         }
 
         else {
