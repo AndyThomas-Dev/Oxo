@@ -1,22 +1,9 @@
-import javax.lang.model.type.NullType;
-import javafx.application.*;
-import javafx.stage.*;
-import javafx.scene.*;
-import javafx.scene.canvas.*;
-import javafx.scene.paint.*;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
-import javafx.event.*;
-import javafx.scene.text.*;
-import javafx.geometry.*;
-
 class OXOController
 {
     private String input;
     private OXOModel model;
-
-    public int current = 1;
-    public boolean GameOver = false;
+    private int current = 1;
+    private boolean GameOver = false;
 
     public OXOController(OXOModel model)
     {
@@ -34,11 +21,10 @@ class OXOController
 
         model.setCurrentPlayer(model.getPlayerByNumber(0));
 
-
-            System.out.println(input);
+        System.out.println(input);
     }
 
-    public int convertCharToInt(char c)
+    private int convertCharToInt(char c)
     {
         int x;
 
@@ -47,17 +33,20 @@ class OXOController
             return x;
         }
 
-        if(c >= 'A' & c <= 'C') {
+        if(c >= 'A' & c <= 'Z') {
             x = c - 'A';
             return x;
         }
 
-        x = Character.getNumericValue(c) - 1;
+        if(Character.isDigit(c) == true) {
+            x = Character.getNumericValue(c) - 1;
+            return x;
+        }
 
-        return x;
+        return -1;
     }
 
-    public void swapPlayer(int current)
+    private void swapPlayer(int current)
     {
         int players = model.getNumberOfPlayers();
         model.setCurrentPlayer(model.getPlayerByNumber(current));
@@ -68,34 +57,51 @@ class OXOController
             CellAlreadyTakenException, CellDoesNotExistException
     {
         char[] characters = command.toCharArray();
-        char x = characters[0]; char y = characters[1];
+        int x = convertCharToInt(characters[0]);
+        int y = convertCharToInt(characters[1]);
 
+        // Flags if input is too long //
         if(command.length() > 2)
         {
-            throw new InvalidCellIdentifierException("Bad", "Bad");
+            throw new InvalidCellIdentifierException("", command);
         }
 
-        if((convertCharToInt(x) > 2 || convertCharToInt(y) > 2) ||
-                (convertCharToInt(x) < 0 || convertCharToInt(y) < 0)) {
-            throw new CellDoesNotExistException(convertCharToInt(x), convertCharToInt(y));
+        // Flags invalid characters //
+        if(x < 0 || y < 0)
+        {
+            throw new InvalidCellIdentifierException("", command);
         }
+
+        if(x > model.getNumberOfColumns()-1 || y  > model.getNumberOfRows()-1) {
+            throw new CellDoesNotExistException(x, y);
+        }
+
         else {
 
             if(GameOver == false) {
-                if(model.getCellOwner(convertCharToInt(x), convertCharToInt(y)) == null) {
-                    model.setCellOwner(convertCharToInt(x), convertCharToInt(y), model.getCurrentPlayer());
+                if(model.getCellOwner(x, y) == null) {
+                    model.setCellOwner(x, y, model.getCurrentPlayer());
                     swapPlayer(current);
                 }
                 else{
-                    throw new CellAlreadyTakenException(convertCharToInt(x), convertCharToInt(y));
+                    throw new CellAlreadyTakenException(x, y);
                 }
             }
 
         }
 
         checkOutcome();
+        moveToNextPlayer();
 
-        // Moves to next player
+        if(command.contains("exit"))
+        {
+            System.exit(0);
+        }
+
+    }
+
+    private void moveToNextPlayer()
+    {
         if(current == 0) {
             if(current != model.getNumberOfPlayers()-1) {
                 current++;
@@ -106,17 +112,10 @@ class OXOController
             current = 0;
         }
 
-
-        if(command.contains("exit"))
-        {
-            System.exit(0);
-        }
-
     }
 
     private void checkOutcome()
     {
-
         if (winnerCheck(model, 1) == 1)
         {
             model.setWinner(model.getPlayerByNumber(1));
@@ -152,7 +151,7 @@ class OXOController
             }
         }
 
-    return 1;
+        return 1;
     }
 
     private int winnerCheck(OXOModel model, int playerNumb)
@@ -264,6 +263,7 @@ class OXOController
         assert(convertCharToInt('a') == 0);
         assert(convertCharToInt('b') == 1);
         assert(convertCharToInt('c') == 2);
+        assert(convertCharToInt('Z') == 25);
 
         model.setCellOwner(0,0, model.getPlayerByNumber(1));
         model.setCellOwner(0,2, model.getPlayerByNumber(1));
