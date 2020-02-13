@@ -138,15 +138,14 @@ class OXOController
             model.setGameDrawn();
             GameOver = true;
         }
-
     }
 
     private int drawCheck(OXOModel model)
     {
         int x = 0; int y = 0;
 
-        for(x = 0; x < 3; x++){
-            for(y = 0; y < 3; y++){
+        for(x = 0; x < model.getNumberOfRows(); x++){
+            for(y = 0; y < model.getNumberOfColumns(); y++){
 
                 if(model.getCellOwner(x,y) == null)
                 {
@@ -265,10 +264,22 @@ class OXOController
     {
         assert(model.getNumberOfPlayers() == 2);
 
+        // Character conversion
         assert(convertCharToInt('a') == 0);
         assert(convertCharToInt('b') == 1);
         assert(convertCharToInt('c') == 2);
         assert(convertCharToInt('Z') == 25);
+
+        // Integer conversion
+        assert(convertCharToInt('1') == 0);
+        assert(convertCharToInt('2') == 1);
+        assert(convertCharToInt('9') == 8);
+
+        // Flag invalid chars
+        assert(convertCharToInt('0') == -1);
+        assert(convertCharToInt('"') == -1);
+        assert(convertCharToInt('%') == -1);
+        assert(convertCharToInt('&') == -1);
 
         model.setCellOwner(0,0, model.getPlayerByNumber(1));
         model.setCellOwner(0,2, model.getPlayerByNumber(1));
@@ -293,6 +304,7 @@ class OXOController
         model.setCellOwner(0,2, model.getPlayerByNumber(1));
         model.setCellOwner(1,1, model.getPlayerByNumber(1));
         model.setCellOwner(2,0, model.getPlayerByNumber(1));
+
         assert(winnerCheck(model, 1) == 1);
         assert(drawCheck(model) == -1);
 
