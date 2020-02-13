@@ -9,6 +9,15 @@ class OXOController
     {
         this.model = model;
 
+        checkAssertionsEnabled();
+
+        model.setCurrentPlayer(model.getPlayerByNumber(0));
+
+        System.out.println(input);
+    }
+
+    private void checkAssertionsEnabled() {
+
         boolean assertionsEnabled = false;
         assert(assertionsEnabled = true);
 
@@ -18,10 +27,6 @@ class OXOController
         {
             testing(model);
         }
-
-        model.setCurrentPlayer(model.getPlayerByNumber(0));
-
-        System.out.println(input);
     }
 
     private int convertCharToInt(char c)
@@ -44,12 +49,6 @@ class OXOController
         }
 
         return -1;
-    }
-
-    private void swapPlayer(int current)
-    {
-        int players = model.getNumberOfPlayers();
-        model.setCurrentPlayer(model.getPlayerByNumber(current));
     }
 
     // Deals with input string
@@ -98,6 +97,12 @@ class OXOController
             System.exit(0);
         }
 
+    }
+
+    private void swapPlayer(int current)
+    {
+        int players = model.getNumberOfPlayers();
+        model.setCurrentPlayer(model.getPlayerByNumber(current));
     }
 
     private void moveToNextPlayer()
