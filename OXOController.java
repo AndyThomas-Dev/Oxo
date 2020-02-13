@@ -2,7 +2,7 @@ class OXOController
 {
     private String input;
     private OXOModel model;
-    private int current = 1;
+    private int current = 0;
     private boolean GameOver = false;
 
     public OXOController(OXOModel model)
@@ -13,7 +13,6 @@ class OXOController
 
         model.setCurrentPlayer(model.getPlayerByNumber(0));
 
-        System.out.println(input);
     }
 
     private void checkAssertionsEnabled() {
@@ -80,7 +79,7 @@ class OXOController
             if(GameOver == false) {
                 if(model.getCellOwner(x, y) == null) {
                     model.setCellOwner(x, y, model.getCurrentPlayer());
-                    swapPlayer(current);
+                    moveToNextPlayer();
                 }
                 else{
                     throw new CellAlreadyTakenException(x, y);
@@ -90,7 +89,6 @@ class OXOController
         }
 
         checkOutcome();
-        moveToNextPlayer();
 
         if(command.contains("exit"))
         {
@@ -99,38 +97,36 @@ class OXOController
 
     }
 
-    private void swapPlayer(int current)
-    {
-        int players = model.getNumberOfPlayers();
-        model.setCurrentPlayer(model.getPlayerByNumber(current));
-    }
 
     private void moveToNextPlayer()
     {
-        if(current == 0) {
-            if(current != model.getNumberOfPlayers()-1) {
-                current++;
-            }
+        if(current < model.getNumberOfPlayers()-1) {
+            current++;
         }
 
         else {
             current = 0;
         }
 
+        System.out.println(current);
+        model.setCurrentPlayer(model.getPlayerByNumber(current));
+
     }
 
     private void checkOutcome()
     {
-        if (winnerCheck(model, 1) == 1)
-        {
-            model.setWinner(model.getPlayerByNumber(1));
-            GameOver = true;
-        }
+        int playerNumb = 0;
 
-        if (winnerCheck(model, 0) == 0)
+        while(playerNumb < model.getNumberOfPlayers())
         {
-            model.setWinner(model.getPlayerByNumber(0));
-            GameOver = true;
+            if (winnerCheck(model, playerNumb) == playerNumb)
+            {
+                model.setWinner(model.getPlayerByNumber(playerNumb));
+                GameOver = true;
+                return;
+            }
+
+            playerNumb++;
         }
 
         if (drawCheck(model) == 1)
@@ -158,103 +154,92 @@ class OXOController
         return 1;
     }
 
+    private int scanDiagonalLeft(int playerNumb)
+    {
+        int counter = 0; int x = 0;
+
+        while(counter < model.getNumberOfRows()) {
+
+            if (model.getCellOwner(counter, counter) == model.getPlayerByNumber(playerNumb)) {
+                x++;
+            }
+
+            counter++;
+        }
+
+        if(x == model.getWinThreshold() ) {
+            return playerNumb;
+        }
+        else{
+            return -1;
+        }
+
+    }
+
+    private int scanDiagonalRight(int playerNumb)
+    {
+        int counter = model.getWinThreshold()-1;
+        int counter2 = 0;
+        int x = 0;
+
+        while(counter2 < model.getWinThreshold()) {
+
+            if (model.getCellOwner(counter2, counter) == model.getPlayerByNumber(playerNumb)) {
+                x++;
+            }
+
+            counter--;
+            counter2++;
+        }
+
+        if(x == model.getWinThreshold() ) {
+            return playerNumb;
+        }
+        else{
+            return -1;
+        }
+
+    }
+
+    private int scanStraightLines(int playerNumb)
+    {
+        int column = 0;
+        int row = 0;
+        int counter = 0;
+        int x = 0;
+
+        while(counter < model.getWinThreshold()*model.getNumberOfRows()) {
+
+            if(column == model.getNumberOfColumns())
+            {
+                row++;
+                column = 0;
+            }
+
+            if (model.getCellOwner(row, column) == model.getPlayerByNumber(playerNumb)) {
+                x++;
+
+                if(x == model.getWinThreshold() ) {
+                    return playerNumb;
+                }
+
+            }
+
+            column++;
+            counter++;
+        }
+
+        return -1;
+    }
+
     private int winnerCheck(OXOModel model, int playerNumb)
     {
-        // Top left, Bottom right
-        if(model.getCellOwner(0,0) == model.getPlayerByNumber(playerNumb))
-        {
-            if(model.getCellOwner(1,1) == model.getPlayerByNumber(playerNumb))
-            {
-                if(model.getCellOwner(2,2) == model.getPlayerByNumber(playerNumb))
-                {
-                    return playerNumb;
-                }
-            }
-        }
+        int x = scanDiagonalLeft(playerNumb);
+        int y = scanDiagonalRight(playerNumb);
+        int z = scanStraightLines(playerNumb);
 
-        // Top right, Bottom left
-        if(model.getCellOwner(0,2) == model.getPlayerByNumber(playerNumb))
-        {
-            if(model.getCellOwner(1,1) == model.getPlayerByNumber(playerNumb))
-            {
-                if(model.getCellOwner(2,0) == model.getPlayerByNumber(playerNumb))
-                {
-                    return playerNumb;
-                }
-            }
-        }
-
-
-        // Right Column
-        if(model.getCellOwner(0,2) == model.getPlayerByNumber(playerNumb))
-        {
-            if(model.getCellOwner(1,2) == model.getPlayerByNumber(playerNumb))
-            {
-                if(model.getCellOwner(2,2) == model.getPlayerByNumber(playerNumb))
-                {
-                    return playerNumb;
-                }
-            }
-        }
-
-        // Middle Column
-        if(model.getCellOwner(0,1) == model.getPlayerByNumber(playerNumb))
-        {
-            if(model.getCellOwner(1,1) == model.getPlayerByNumber(playerNumb))
-            {
-                if(model.getCellOwner(2,1) == model.getPlayerByNumber(playerNumb))
-                {
-                    return playerNumb;
-                }
-            }
-        }
-
-        // Left Column
-        if(model.getCellOwner(0,0) == model.getPlayerByNumber(playerNumb))
-        {
-            if(model.getCellOwner(1,0) == model.getPlayerByNumber(playerNumb))
-            {
-                if(model.getCellOwner(2,0) == model.getPlayerByNumber(playerNumb))
-                {
-                    return playerNumb;
-                }
-            }
-        }
-
-        // Bottom Row
-        if(model.getCellOwner(2,0) == model.getPlayerByNumber(playerNumb))
-        {
-            if(model.getCellOwner(2,1) == model.getPlayerByNumber(playerNumb))
-            {
-                if(model.getCellOwner(2,2) == model.getPlayerByNumber(playerNumb))
-                {
-                    return playerNumb;
-                }
-            }
-        }
-
-        // Middle row
-        if(model.getCellOwner(1,0) == model.getPlayerByNumber(playerNumb))
-        {
-            if(model.getCellOwner(1,1) == model.getPlayerByNumber(playerNumb))
-            {
-                if(model.getCellOwner(1,2) == model.getPlayerByNumber(playerNumb))
-                {
-                    return playerNumb;
-                }
-            }
-        }
-
-        // Top Row
-        if(model.getCellOwner(0,0) == model.getPlayerByNumber(playerNumb))
-        {
-            if(model.getCellOwner(0,1) == model.getPlayerByNumber(playerNumb))
-            {
-                if(model.getCellOwner(0,2) == model.getPlayerByNumber(playerNumb))
-                {
-                    return playerNumb;
-                }
-            }
+        if(x == playerNumb || y == playerNumb || z == playerNumb) {
+            return playerNumb;
         }
 
         return -1;
@@ -262,7 +247,7 @@ class OXOController
 
     public void testing(OXOModel model)
     {
-        assert(model.getNumberOfPlayers() == 2);
+        assert(model.getNumberOfPlayers() == 3);
 
         // Character conversion
         assert(convertCharToInt('a') == 0);
@@ -281,42 +266,75 @@ class OXOController
         assert(convertCharToInt('%') == -1);
         assert(convertCharToInt('&') == -1);
 
-        model.setCellOwner(0,0, model.getPlayerByNumber(1));
-        model.setCellOwner(0,2, model.getPlayerByNumber(1));
+//        // Top left to bottom right
+//        model.setCellOwner(0,0, model.getPlayerByNumber(1));
+//        model.setCellOwner(1,1, model.getPlayerByNumber(1));
+//        model.setCellOwner(2,2, model.getPlayerByNumber(1));
+//        model.setCellOwner(3,3, model.getPlayerByNumber(1));
+//        assert(winnerCheck(model, 1) == 1);
+
+//        model.setCellOwner(0,3, model.getPlayerByNumber(1));
+//        model.setCellOwner(1,2, model.getPlayerByNumber(1));
+//        model.setCellOwner(2,1, model.getPlayerByNumber(1));
+//        model.setCellOwner(3,0, model.getPlayerByNumber(1));
+//        assert(winnerCheck(model, 1) == 1);
+
+//        model.setCellOwner(0,3, model.getPlayerByNumber(1));
+//        model.setCellOwner(0,2, model.getPlayerByNumber(1));
+//        model.setCellOwner(0,1, model.getPlayerByNumber(1));
+//        model.setCellOwner(0,0, model.getPlayerByNumber(1));
+//        assert(winnerCheck(model, 1) == 1);
+
+//        model.setCellOwner(3,3, model.getPlayerByNumber(1));
+//        model.setCellOwner(3,2, model.getPlayerByNumber(1));
+//        model.setCellOwner(3,1, model.getPlayerByNumber(1));
+//        model.setCellOwner(3,0, model.getPlayerByNumber(1));
+//        assert(winnerCheck(model, 1) == 1);
+
+//        model.setCellOwner(2,3, model.getPlayerByNumber(1));
+//        model.setCellOwner(2,2, model.getPlayerByNumber(1));
+//        model.setCellOwner(2,1, model.getPlayerByNumber(1));
+//        model.setCellOwner(2,0, model.getPlayerByNumber(1));
+//        assert(winnerCheck(model, 1) == 1);
+
         model.setCellOwner(0,1, model.getPlayerByNumber(1));
+        model.setCellOwner(1,1, model.getPlayerByNumber(1));
+        model.setCellOwner(2,1, model.getPlayerByNumber(1));
+        model.setCellOwner(3,1, model.getPlayerByNumber(1));
         assert(winnerCheck(model, 1) == 1);
 
-        model.setCellOwner(0,0, model.getPlayerByNumber(1));
-        model.setCellOwner(0,2, model.getPlayerByNumber(0));
-        model.setCellOwner(0,1, model.getPlayerByNumber(1));
-        assert(winnerCheck(model, 1) == -1);
+//        // Top right to bottom left
+//        model.setCellOwner(2,2, model.getPlayerByNumber(1));
+//        model.setCellOwner(1,1, model.getPlayerByNumber(1));
+//        model.setCellOwner(0,0, model.getPlayerByNumber(1));
+//        assert(winnerCheck(model, 1) == 1);
+//
+//        model.setCellOwner(2,0, model.getPlayerByNumber(0));
+//        model.setCellOwner(2,2, model.getPlayerByNumber(0));
+//        model.setCellOwner(2,1, model.getPlayerByNumber(0));
+//        assert(winnerCheck(model, 0) == 0);
+//
+//        model.setCellOwner(0,0, model.getPlayerByNumber(0));
+//        model.setCellOwner(1,0, model.getPlayerByNumber(0));
+//        model.setCellOwner(2,0, model.getPlayerByNumber(0));
+//        assert(winnerCheck(model, 0) == 0);
+//
+//        model.setCellOwner(0,2, model.getPlayerByNumber(1));
+//        model.setCellOwner(1,1, model.getPlayerByNumber(1));
+//        model.setCellOwner(2,0, model.getPlayerByNumber(1));
+//
+//        assert(winnerCheck(model, 1) == 1);
+//        assert(drawCheck(model) == -1);
 
-        model.setCellOwner(2,0, model.getPlayerByNumber(0));
-        model.setCellOwner(2,2, model.getPlayerByNumber(0));
-        model.setCellOwner(2,1, model.getPlayerByNumber(0));
-        assert(winnerCheck(model, 0) == 0);
-
-        model.setCellOwner(0,0, model.getPlayerByNumber(0));
-        model.setCellOwner(1,0, model.getPlayerByNumber(0));
-        model.setCellOwner(2,0, model.getPlayerByNumber(0));
-        assert(winnerCheck(model, 0) == 0);
-
-        model.setCellOwner(0,2, model.getPlayerByNumber(1));
-        model.setCellOwner(1,1, model.getPlayerByNumber(1));
-        model.setCellOwner(2,0, model.getPlayerByNumber(1));
-
-        assert(winnerCheck(model, 1) == 1);
-        assert(drawCheck(model) == -1);
-
-        // Check for a draw
-        model.setCellOwner(0,0, model.getPlayerByNumber(0));
-        model.setCellOwner(0,1, model.getPlayerByNumber(0));
-        model.setCellOwner(0,2, model.getPlayerByNumber(1));
-        model.setCellOwner(1,0, model.getPlayerByNumber(1));
-        model.setCellOwner(1,1, model.getPlayerByNumber(1));
-        model.setCellOwner(1,2, model.getPlayerByNumber(0));
-        assert(drawCheck(model) == 1);
+//        // Check for a draw
+//        model.setCellOwner(0,0, model.getPlayerByNumber(0));
+//        model.setCellOwner(0,1, model.getPlayerByNumber(0));
+//        model.setCellOwner(0,2, model.getPlayerByNumber(1));
+//        model.setCellOwner(1,0, model.getPlayerByNumber(1));
+//        model.setCellOwner(1,1, model.getPlayerByNumber(1));
+//        model.setCellOwner(1,2, model.getPlayerByNumber(0));
+//        assert(drawCheck(model) == 1);
     }
 
-
 }
+
