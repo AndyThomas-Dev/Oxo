@@ -4,6 +4,7 @@
 // As it stands, controller can accommodate (beyond the normal spec):
 // - Different sizes of grid (provided rows=columns) i.e. 2x2, 3x3, 4x4 etc.
 // - Different sizes of grid (where rows != columns) i.e. 4x5, 6x8 etc. (though not extensively tested).
+// - Different win thresholds.
 // - Multiple players.
 
 class OXOController
