@@ -1,3 +1,7 @@
+// As it stands, controller can accommodate (beyond the normal spec):
+// - Different sizes of grid (provided rows=columns) i.e. 2x2, 3x3, 4x3 etc.
+// - Multiple players.
+
 class OXOController
 {
     private String input;
@@ -59,13 +63,7 @@ class OXOController
         int y = convertCharToInt(characters[1]);
 
         // Flags if input is too long //
-        if(command.length() > 2)
-        {
-            throw new InvalidCellIdentifierException("", command);
-        }
-
-        // Flags invalid characters //
-        if(x < 0 || y < 0)
+        if(command.length() > 2 || x < 0 || y < 0)
         {
             throw new InvalidCellIdentifierException("", command);
         }
