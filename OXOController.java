@@ -14,6 +14,8 @@ class OXOController
 
     public OXOController(OXOModel model)
     {
+
+        // Move to seperate validation function
         if(model.getNumberOfColumns() > 9 || model.getNumberOfRows() > 9)
         {
             System.out.println("Row/column size is too large. Max size should be 9. Exiting...");
@@ -93,7 +95,7 @@ class OXOController
             throw new InvalidCellIdentifierException("", command);
         }
 
-        if(x > model.getNumberOfColumns()-1 || y  > model.getNumberOfRows()-1) {
+        if(x > model.getNumberOfRows()-1 || y  > model.getNumberOfColumns()-1) {
             throw new CellDoesNotExistException(x, y);
         }
 
